@@ -1,6 +1,6 @@
 # Arkitektur
 
-**Version 1.0 · Elevskabelon**
+**Version 1.0**
 
 ## Indhold
 
@@ -10,30 +10,49 @@
 
 ## Data
 
-**Yellow Taxi:** Én rå række ser ud til at repræsentere:
+**Yellow Taxi:** Én rå række repræsenterer én afsluttet taxitur. Rækken indeholder blandt andet tidspunkt, pickup- og dropoff-zone, distance, betaling og passageroplysninger.
 
-> TODO
+**Taxi Zone Lookup:** Én række repræsenterer én geografisk taxi-zone. `LocationID` bruges til at koble zonen sammen med `PULocationID` eller `DOLocationID` i tripdataene.
 
-**Taxi Zone Lookup:** Én række repræsenterer:
+### Relevante felter
 
-> TODO
+- `tpep_pickup_datetime`: Tidspunktet hvor turen blev startet.
+- `tpep_dropoff_datetime`: Tidspunktet hvor turen blev afsluttet.
+- `PULocationID`: ID for pickup-zonen.
+- `DOLocationID`: ID for dropoff-zonen.
+- `trip_distance`: Turens afstand i miles.
+- `fare_amount`: Grundprisen for turen før eventuelle ekstra beløb.
 
-Beskriv 3–5 relevante felter med egne ord. Find betydning og enheder i TLC's dataordbog, og henvis til kilden. Notér også en eventuel uventet værdi uden at ændre raw-data.
+Feltbetydningerne er undersøgt i [NYC TLC Yellow Taxi Data Dictionary](https://www.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf).
 
-> TODO: feltforklaringer og observationer.
+Zone Lookup indeholder blandt andet:
+
+- `LocationID`: Zone-ID, som bruges som nøgle i joinet.
+- `Borough`: Området eller bydelen zonen tilhører.
+- `Zone`: Navnet på taxi-zonen.
+- `service_zone`: Den servicezone som området tilhører.
+
+En vigtig observation er, at nogle ture kan have en `PULocationID`, som ikke kan matches til en række i Zone Lookup. Disse ture skal ikke slettes fra raw-data. Et `LEFT JOIN` bevarer turene, mens zonefelterne bliver `NULL`, hvis der ikke findes et match.
 
 ## Analysebehov
 
-1. TODO
-2. TODO
-3. TODO
+1. Hvilke pickup-zoner har flest taxiture?
+2. Hvilke boroughs har flest taxiture, og hvad er den gennemsnitlige distance i de enkelte boroughs?
+3. Hvordan varierer antallet af ture og den gennemsnitlige distance over tid?
 
-Mindst ét spørgsmål skal bruge Zone Lookup. Alle spørgsmål skal kunne undersøges med de udleverede data.
+Det andet analysebehov bruger Zone Lookup, fordi `PULocationID` kobles til `LocationID`, `Borough` og `Zone`.
 
 ## Arkitekturskitse
 
-> TODO: Indsæt dit eget diagram. Brug Mermaid eller et andet diagramværktøj.
+```mermaid
+flowchart LR
+    A[Yellow Taxi Parquet] --> B[Raw data]
+    C[Taxi Zone Lookup CSV] --> B
+    B --> D[DuckDB SQL]
+    D --> E[Dataundersøgelse]
+    D --> F[Join på PULocationID = LocationID]
+    F --> G[Afledte analyse-resultater]
+    G --> H[Terminal eller rapport]
 
-Begrund dit dataflow ud fra analysebehovene. Forklar, hvor de rå data bevares, hvad der sker mellem input og resultat, og hvilke data der er afledte. Markér det, der virker nu, og det, der skal bygges senere.
-
-> TODO: Din forklaring og de kilder, du har brugt.
+    D -. senere .-> I[Modeled tables]
+    I -. senere .-> J[Aggregates]
