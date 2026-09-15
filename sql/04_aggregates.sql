@@ -1,0 +1,5 @@
+-- 20556 · Onsdag · Version 1.0
+-- TODO: Byg et relevant aggregate ud fra den analytiske model.
+-- Vælg og begrund grain, grupperinger og beregninger ud fra et analysebehov.
+-- Vis, hvilken information der bevares, og hvilken der går tabt.
+-- Undersøg, hvad der sker, hvis dit resultat aggregeres endnu en gang.

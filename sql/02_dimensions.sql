@@ -1,0 +1,6 @@
+-- 20556 · Tirsdag · Version 1.0
+-- TODO: Implementér dim_zone og dim_date ud fra din dokumenterede model.
+-- Dimensionerne skal kunne bruges til både pickup og dropoff.
+-- Begrund nøgler og attributter. Undersøg, om nøglerne er entydige,
+-- og om datodimensionen dækker begge roller i de faktiske data.
+-- Bevar raw-input uændret. Skriv selv SQL og relevante kontroller.
