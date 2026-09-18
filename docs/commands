@@ -1,0 +1,17 @@
+
+
+.\.venv\Scripts\python.exe src\check_setup.py
+.\.venv\Scripts\python.exe src\download_data.py
+
+
+
+.\.venv\Scripts\python.exe src\run_sql_file.py sql\01_explore.sql
+.\.venv\Scripts\python.exe src\run_sql_file.py sql\02_dimensions.sql
+.\.venv\Scripts\python.exe src\run_sql_file.py sql\03_fact_trip.sql
+.\.venv\Scripts\python.exe src\run_sql_file.py sql\04_aggregates.sql
+
+
+
+.\.venv\Scripts\python.exe src\pipeline.py
+
+
