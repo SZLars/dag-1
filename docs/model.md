@@ -1,6 +1,6 @@
 # Datamodel
 
-**Version 1.2 · Elevskabelon**
+**Version 1.2**
 
 ## Indhold
 
@@ -12,25 +12,17 @@
 6. [Kontroller](#6-kontroller)
 7. [Forklaring og kilder](#7-forklaring-og-kilder)
 
----
-
 # 1. Første modelskitse
 
-Vælg 2–3 analysebehov fra mandag. Skriv kort, hvilke oplysninger modellen skal gøre nemme at bruge.
-
-> TODO
 Modellen skal gøre det nemt at undersøge:
 
 1. Hvilke pickup-zoner har flest ture?
 2. Hvilke boroughs har flest ture, og hvad er den gennemsnitlige distance?
-3. Hvordan varierer antal ture og gennemsnitlig distance over tid?
+3. Hvordan varierer antallet af ture og den gennemsnitlige distance over tid?
 
 Modellen skal derfor indeholde taxiture, zoneoplysninger og datooplysninger.
 
-Tegn en første modelskitse med almindelige ord, før du færdiggør den formelle model.
-
-> TODO
-Første skitse:
+Første modelskitse:
 
 ```text
 Taxiture
@@ -44,174 +36,152 @@ Taxiture
 
 Zoneoplysninger bruges til pickup- og dropoff-zoner.
 Datooplysninger bruges til pickup- og dropoff-datoer.
+```
 
+# 2. Grain
 
-## 2. Grain
+Én række i `fact_trip` repræsenterer én taxitur.
 
-Erstat linjen og `TODO` med:
-
-```markdown
-> Én række i `fact_trip` repræsenterer én taxitur.
-
-Dette grain passer til analysebehovene, fordi hver tur har en pickup-zone, en
-dropoff-zone, en pickup-dato, en dropoff-dato og forskellige numeriske værdier.
+Dette grain passer til analysebehovene, fordi hver tur har en pickup-zone,
+en dropoff-zone, en pickup-dato, en dropoff-dato og numeriske værdier.
 Dermed kan turene tælles og grupperes efter zone og dato, og measures som
 distance og beløb kan beregnes.
 
-`trip_key` identificerer teknisk den enkelte række i `fact_trip`. Den beskriver
-ikke turens faglige grain, men fungerer som en teknisk primærnøgle.
-
-Formulér hvad én række i `fact_trip` repræsenterer.
-
-> Én række i `fact_trip` repræsenterer TODO.
-
-Forklar hvorfor dette grain passer til dine analysebehov.
-
-> TODO
+`trip_key` identificerer teknisk den enkelte række i `fact_trip`. Den
+beskriver ikke turens faglige grain, men fungerer som en teknisk primærnøgle.
 
 # 3. Measures og dimensions
 
-**Vigtigste measures:**
+## Measures
 
 - `passenger_count`: antal passagerer
 - `trip_distance`: turens afstand i miles
 - `fare_amount`: grundpris
 - `total_amount`: samlet beløb
 
-
-> TODO
-
-**Vigtigste dimensions:**
+## Dimensions
 
 - `dim_zone`: pickup- og dropoff-zone
 - `dim_date`: pickup- og dropoff-dato
 
-
-Forklar kort forskellen på en measure og en dimension i din model.
-
-> TODO
 En measure er en numerisk værdi, som kan tælles, summeres eller
 gennemsnitsberegnes. En dimension beskriver den sammenhæng, som en measure
 analyseres efter, for eksempel en zone eller en dato.
 
 # 4. Relationer og roller
 
-Forklar hvordan `dim_zone` bruges i pickup- og dropoff-rollen.
-
-> TODO
-`dim_zone` bruges i to roller. `pickup_zone_key` peger på den zone, hvor turen
-starter, mens `dropoff_zone_key` peger på den zone, hvor turen slutter.
+`dim_zone` bruges i to roller. `pickup_zone_key` peger på den zone, hvor
+turen starter, mens `dropoff_zone_key` peger på den zone, hvor turen slutter.
 Det er den samme dimension, men relationerne har forskellige faglige roller.
 
-
-Forklar hvordan `dim_date` bruges i pickup- og dropoff-rollen.
-
-> TODO
 `dim_date` bruges også i to roller. `pickup_date_key` peger på datoen, hvor
 turen starter, mens `dropoff_date_key` peger på datoen, hvor turen slutter.
-På den måde kan samme dato-dimension bruges til begge tidsmæssige roller.
+På den måde kan den samme dato-dimension bruges til begge tidsmæssige roller.
 
 # 5. Modeldiagram
 
-Tegn dit eget diagram med tabeller, nøgler, relationer og roller.
+Diagrammet viser et star schema. `FACT_TRIP` er fact-tabellen, og
+`DIM_ZONE` og `DIM_DATE` er dimensionstabeller. Hver dimension bruges i to
+forskellige roller.
 
-Du kan bruge Mermaid, tekstdiagram eller et billede af en håndtegnet model. Vis selv de tabeller, nøgler og relationer, du har valgt. Markér hvilken rolle hver relation spiller, og forklar om en dimension kan bruges i flere roller.
+```text
++----------------------+
+|       DIM_ZONE       |
++----------------------+
+| PK zone_key          |
+|    borough           |
+|    zone              |
+|    service_zone      |
++----------------------+
+       |          |
+ pickup|          |dropoff
+     1 |          | 1
+       |          |
+     * |          | *
++--------------------------+
+|        FACT_TRIP         |
++--------------------------+
+| PK trip_key              |
+| FK pickup_zone_key       |
+| FK dropoff_zone_key      |
+| FK pickup_date_key       |
+| FK dropoff_date_key      |
+|    passenger_count       |
+|    trip_distance         |
+|    fare_amount           |
+|    total_amount          |
++--------------------------+
+     * |          | *
+       |          |
+ pickup|          |dropoff
+ date  |          | date
+     1 |          | 1
+       |          |
++----------------------+
+|       DIM_DATE       |
++----------------------+
+| PK date_key          |
+|    date_day          |
+|    year              |
+|    month             |
+|    day               |
+|    weekday           |
++----------------------+
+```
 
-> TODO: Indsæt dit eget diagram her.
-                    +----------------------+
-                    |       DIM_ZONE       |
-                    +----------------------+
-                    | PK zone_key          |
-                    |    borough           |
-                    |    zone              |
-                    |    service_zone      |
-                    +----------------------+
-                       |              |
-           pickup_zone |              | dropoff_zone
-                     1 |              | 1
-                       |              |
-                     * |              | *
-                 +--------------------------+
-                 |        FACT_TRIP         |
-                 +--------------------------+
-                 | PK trip_key              |
-                 | FK pickup_zone_key       |
-                 | FK dropoff_zone_key      |
-                 | FK pickup_date_key       |
-                 | FK dropoff_date_key      |
-                 |    trip_distance         |
-                 |    fare_amount           |
-                 |    total_amount          |
-                 +--------------------------+
-                     * |              | *
-                       |              |
-            pickup_date|              |dropoff_date
-                     1 |              | 1
-                       |              |
-                    +----------------------+
-                    |       DIM_DATE       |
-                    +----------------------+
-                    | PK date_key          |
-                    |    date_day          |
-                    |    year              |
-                    |    month             |
-                    |    day               |
-                    |    weekday           |
-                    +----------------------+
+`dim_zone` og `dim_date` er role-playing dimensions, fordi den samme
+dimension bruges flere gange med forskellige roller.
 
 # 6. Kontroller
 
-Beskriv hvilke kontroller du har lavet.
+Jeg har lavet følgende kontroller:
 
-Du skal som minimum kunne vise:
-
-- om dimensionsnøglerne er entydige;
-- om `dim_date` dækker både pickup- og dropoff-datoer;
-- om joins til pickup/dropoff-zone giver manglende matches;
-- om join til dimensions ikke giver uventet flere fact-rækker.
-
-> TODO
-Jeg kontrollerer modellen på følgende måder:
-
-- `dim_zone`: `COUNT(*)` sammenlignes med `COUNT(DISTINCT zone_key)`.
+- `dim_zone`: antal rækker sammenlignes med antal unikke `zone_key`.
 - `dim_date`: antal rækker sammenlignes med antal unikke `date_key`.
-- `dim_date`: minimums- og maksimumsdato kontrolleres mod både pickup- og
-  dropoff-datoerne i raw-data.
-- Pickup-zone: fact-tabellen left-joines til `dim_zone`, og manglende matches
-  tælles.
-- Dropoff-zone: fact-tabellen left-joines til `dim_zone`, og manglende matches
-  tælles.
-- Pickup- og dropoff-dato: begge nøgler kontrolleres mod `dim_date`.
-- Kardinalitet: antal rækker i `fact_trip` sammenlignes med antal rækker efter
-  joins til dimensionerne. Antallet må ikke blive større, fordi hver
-  dimensionsnøgle skal være entydig.
+- `dim_date`: datoerne kontrolleres mod både pickup- og dropoff-datoer.
+- Pickup-zone: manglende matches til `dim_zone` tælles.
+- Dropoff-zone: manglende matches til `dim_zone` tælles.
+- Pickup-dato: manglende matches til `dim_date` tælles.
+- Dropoff-dato: manglende matches til `dim_date` tælles.
+- Antal rækker i `fact_trip` sammenlignes med antal rækker efter joins til
+  dimensionerne.
+
+Kontrollerne viste:
+
+- `dim_zone` har 265 rækker og 265 unikke nøgler.
+- `fact_trip` har 3.475.226 rækker.
+- Antallet af raw-rækker og fact-rækker er det samme.
+- Der mangler ingen pickup-zone-matches.
+- Der mangler ingen dropoff-zone-matches.
+- Der mangler ingen pickup-date-matches.
+- Der er ét manglende dropoff-date-match.
+
+Det ene manglende dropoff-date-match skyldes en rå taxitur, hvor
+`tpep_dropoff_datetime` mangler. Rækken bevares i `fact_trip`, men dens
+`dropoff_date_key` bliver `NULL`. Raw-data ændres ikke.
+
+Kardinalitetskontrollen viste, at joins til dimensionerne ikke skabte ekstra
+fact-rækker. Begge antal var 3.475.226.
 
 # 7. Forklaring og kilder
 
-Begrund grain, valgte measures og dimensions ud fra analysebehovene. Forklar dimensionernes roller, og vis hvordan du kontrollerer modellens relationer.
-
-Angiv de kilder, du har anvendt, fx dataordbog, DuckDB-dokumentation eller Kimball-begreber.
-
-> TODO
-Jeg har valgt én taxitur som grain, fordi mandagens analysebehov handler om
-at tælle ture og beregne gennemsnit for distance og beløb. `fact_trip` gemmer
+Jeg har valgt én taxitur som grain, fordi analysebehovene handler om at
+tælle ture og beregne gennemsnit for distance og beløb. `fact_trip` gemmer
 de numeriske measures og nøglerne til dimensionerne.
 
-`dim_zone` gør det muligt at analysere ture efter borough, zone og servicezone.
-Den bruges både som pickup-zone og dropoff-zone. `dim_date` gør det muligt at
-analysere ture efter år, måned, dag og ugedag. Den bruges både for turens
-startdato og slutdato.
+`dim_zone` gør det muligt at analysere ture efter borough, zone og
+servicezone. Den bruges både som pickup-zone og dropoff-zone.
 
-Jeg bruger surrogate-lignende tekniske nøgler i fact-tabellen:
-`trip_key` identificerer en fact-række, mens zone- og datonøglerne fungerer
+`dim_date` gør det muligt at analysere ture efter år, måned, dag og ugedag.
+Den bruges både for turens startdato og slutdato.
+
+`trip_key` identificerer teknisk en fact-række. Zone- og datonøglerne fungerer
 som foreign keys til dimensionerne. Raw-filerne bevares uændret, og de
 modellerede tabeller bygges ud fra raw-dataene.
 
 Jeg har brugt følgende kilder:
 
-- NYC TLC Yellow Taxi Data Dictionary:
-  https://www.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf
-- DuckDB dokumentation om Parquet, CSV, joins og tabeller:
-  https://duckdb.org/docs/current/
-- Kimball Group om grain og dimensionel modellering:
-  https://www.kimballgroup.com/data-warehouse-business-intelligence-resources/kimball-techniques/
+- [NYC TLC Trip Record Data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
+- [Yellow Taxi Data Dictionary](https://www.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf)
+- [DuckDB documentation](https://duckdb.org/docs/current/)
+- [Kimball Group: Grain](https://www.kimballgroup.com/data-warehouse-business-intelligence-resources/kimball-techniques/dimensional-modeling-techniques/grain/)
